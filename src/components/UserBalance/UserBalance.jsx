@@ -133,7 +133,7 @@ const UserBalance = () => {
 
       <div className="mb-4">
         <div className="font-semibold">Current Balance:</div>
-        <div>{balance}</div>
+        <div>{balance !== undefined ? balance : 0}</div>
       </div>
 
       <div className="flex items-center mb-4">
@@ -171,8 +171,6 @@ const UserBalance = () => {
           Set to Zero
         </button>
       </div>
-
-      
     </div>
   );
 };
