@@ -4,35 +4,40 @@ import axios from "axios";
 const UserBalance = () => {
   const [userId, setUserId] = useState("");
   const [balanceKey, setBalanceKey] = useState("");
-  const [balance, setBalance] = useState(null); // Initialize balance with null
+  const [balance, setBalance] = useState(0);
   const [amountToAdd, setAmountToAdd] = useState(0);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-  const [userIds, setUserIds] = useState([]);
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    const fetchAllUserIds = async () => {
+    // Fetch all user details when the component mounts
+    const fetchAllUserDetails = async () => {
       try {
         const response = await axios.get(
           `https://wallet-backupper-default-rtdb.firebaseio.com/userbalance.json`
         );
 
         if (response.data) {
-          const ids = Object.keys(response.data);
-          setUserIds(ids);
+          const userDetails = Object.keys(response.data).map((id) => ({
+            id,
+            displayName: response.data[id].displayName || "No Name", // Adjust this according to your database structure
+          }));
+          setUsers(userDetails);
         } else {
-          setUserIds([]);
+          setUsers([]);
         }
       } catch (error) {
-        console.error("Error fetching user IDs:", error);
-        setError("Failed to fetch user IDs");
+        console.error("Error fetching user details:", error);
+        setError("Failed to fetch user details");
       }
     };
 
-    fetchAllUserIds();
+    fetchAllUserDetails();
   }, []);
 
   useEffect(() => {
+    // Fetch user balance based on userId
     const fetchUserBalance = async () => {
       if (!userId) return;
 
@@ -84,7 +89,7 @@ const UserBalance = () => {
       return;
     }
 
-    const newBalance = (balance || 0) + amountToAdd; // Ensure balance is defined before adding
+    const newBalance = balance + amountToAdd;
     updateBalance(newBalance);
   };
 
@@ -94,7 +99,7 @@ const UserBalance = () => {
       return;
     }
 
-    const newBalance = (balance || 0) - amountToAdd; // Ensure balance is defined before subtracting
+    const newBalance = balance - amountToAdd;
     if (newBalance < 0) {
       setError("Insufficient balance");
     } else {
@@ -131,7 +136,7 @@ const UserBalance = () => {
 
       <div className="mb-4">
         <div className="font-semibold">Current Balance:</div>
-        <div>{balance !== null ? balance.toLocaleString() : "Loading..."}</div>
+        <div>{balance}</div>
       </div>
 
       <div className="flex items-center mb-4">
@@ -168,6 +173,15 @@ const UserBalance = () => {
         >
           Set to Zero
         </button>
+      </div>
+
+      <div className="mt-4">
+        <h3 className="font-semibold mb-2">All Users:</h3>
+        {users.map((user) => (
+          <p key={user.id} className="border-b border-gray-200 py-1">
+            {user.displayName} ({user.id})
+          </p>
+        ))}
       </div>
     </div>
   );
