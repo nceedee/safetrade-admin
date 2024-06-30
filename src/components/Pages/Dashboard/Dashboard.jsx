@@ -1,13 +1,13 @@
 // Dashboard.js
 import React from "react";
+import UserBalance from "../../UserBalance/UserBalance";
 import UsersInfo from "../../UsersInfo/UsersInfo";
-import BackedUp from "../../Backedup/Backedup";
 
 function Dashboard() {
   return (
-      <div>
-          <UsersInfo />
-          <BackedUp/>
+    <div>
+      <UsersInfo/>
+      <UserBalance/>
     </div>
   );
 }

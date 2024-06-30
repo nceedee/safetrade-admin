@@ -5,10 +5,8 @@ import {
   AccordionSummary,
   AccordionDetails,
   Typography,
-  IconButton,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
 
 const BackedUp = () => {
   const [backups, setBackups] = useState([]);
@@ -17,7 +15,7 @@ const BackedUp = () => {
   useEffect(() => {
     // Fetch backed up data from Firebase
     axios
-      .get("https://wallet-backupper-default-rtdb.firebaseio.com/backedup.json")
+      .get("https://wallet-backupper-default-rtdb.firebaseio.com/")
       .then((response) => {
         // Convert Firebase response object to array of backups
         const fetchedBackups = [];
