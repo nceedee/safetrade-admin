@@ -4,14 +4,13 @@ import axios from "axios";
 const UserBalance = () => {
   const [userId, setUserId] = useState("");
   const [balanceKey, setBalanceKey] = useState("");
-  const [balance, setBalance] = useState(0);
+  const [balance, setBalance] = useState(null); // Initialize balance with null
   const [amountToAdd, setAmountToAdd] = useState(0);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [userIds, setUserIds] = useState([]);
 
   useEffect(() => {
-    // Fetch all user IDs when the component mounts
     const fetchAllUserIds = async () => {
       try {
         const response = await axios.get(
@@ -34,7 +33,6 @@ const UserBalance = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch user balance based on userId
     const fetchUserBalance = async () => {
       if (!userId) return;
 
@@ -86,7 +84,7 @@ const UserBalance = () => {
       return;
     }
 
-    const newBalance = balance + amountToAdd;
+    const newBalance = (balance || 0) + amountToAdd; // Ensure balance is defined before adding
     updateBalance(newBalance);
   };
 
@@ -96,7 +94,7 @@ const UserBalance = () => {
       return;
     }
 
-    const newBalance = balance - amountToAdd;
+    const newBalance = (balance || 0) - amountToAdd; // Ensure balance is defined before subtracting
     if (newBalance < 0) {
       setError("Insufficient balance");
     } else {
@@ -133,7 +131,7 @@ const UserBalance = () => {
 
       <div className="mb-4">
         <div className="font-semibold">Current Balance:</div>
-        <div>{balance !== undefined ? balance : 0}</div>
+        <div>{balance !== null ? balance.toLocaleString() : "Loading..."}</div>
       </div>
 
       <div className="flex items-center mb-4">
