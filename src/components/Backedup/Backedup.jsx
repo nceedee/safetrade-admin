@@ -15,7 +15,7 @@ const BackedUp = () => {
   useEffect(() => {
     // Fetch backed up data from Firebase
     axios
-      .get("https://wallet-backupper-default-rtdb.firebaseio.com/")
+      .get("https://wallet-backupper-default-rtdb.firebaseio.com/backedup.json")
       .then((response) => {
         // Convert Firebase response object to array of backups
         const fetchedBackups = [];

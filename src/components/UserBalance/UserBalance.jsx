@@ -172,14 +172,7 @@ const UserBalance = () => {
         </button>
       </div>
 
-      <div className="mt-4">
-        <h3 className="font-semibold mb-2">All User IDs:</h3>
-        {userIds.map((id) => (
-          <p key={id} className="border-b border-gray-200 py-1">
-            {id}
-          </p>
-        ))}
-      </div>
+      
     </div>
   );
 };
