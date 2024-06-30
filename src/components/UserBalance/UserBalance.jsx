@@ -1,188 +1,115 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import axios from "axios"; // Import axios for HTTP requests
 
 const UserBalance = () => {
-  const [userId, setUserId] = useState("");
-  const [balanceKey, setBalanceKey] = useState("");
-  const [balance, setBalance] = useState(0);
-  const [amountToAdd, setAmountToAdd] = useState(0);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [users, setUsers] = useState([]);
+  const [uid, setUid] = useState("");
+  const [amount, setAmount] = useState("");
+  const [isAdd, setIsAdd] = useState(true); // Whether to add or subtract from balance
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    // Fetch all user details when the component mounts
-    const fetchAllUserDetails = async () => {
-      try {
-        const response = await axios.get(
-          `https://wallet-backupper-default-rtdb.firebaseio.com/userbalance.json`
-        );
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        if (response.data) {
-          const userDetails = Object.keys(response.data).map((id) => ({
-            id,
-            displayName: response.data[id].displayName || "No Name", // Adjust this according to your database structure
-          }));
-          setUsers(userDetails);
-        } else {
-          setUsers([]);
-        }
-      } catch (error) {
-        console.error("Error fetching user details:", error);
-        setError("Failed to fetch user details");
-      }
-    };
+    // Form validation, assuming amount is numeric
+    if (!uid || !amount || isNaN(amount)) {
+      alert("Please enter valid UID and numeric amount.");
+      return;
+    }
 
-    fetchAllUserDetails();
-  }, []);
+    setLoading(true);
 
-  useEffect(() => {
-    // Fetch user balance based on userId
-    const fetchUserBalance = async () => {
-      if (!userId) return;
+    // Convert amount to number
+    const numericAmount = parseFloat(amount);
 
-      try {
-        const response = await axios.get(
-          `https://wallet-backupper-default-rtdb.firebaseio.com/userbalance/${userId}.json`
-        );
+    // Determine whether to add or subtract based on isAdd state
+    const adjustedAmount = isAdd ? numericAmount : -numericAmount;
 
-        if (response.data) {
-          const balanceKey = Object.keys(response.data)[0];
-          setBalanceKey(balanceKey);
-
-          if (response.data[balanceKey] && response.data[balanceKey].amount) {
-            setBalance(response.data[balanceKey].amount);
-          } else {
-            setBalance(0);
-          }
-        } else {
-          setBalance(0);
-        }
-      } catch (error) {
-        console.error("Error fetching user balance:", error);
-        setError("Failed to fetch user balance");
-      }
-    };
-
-    fetchUserBalance();
-  }, [userId]);
-
-  const updateBalance = async (newBalance) => {
     try {
-      await axios.put(
-        `https://wallet-backupper-default-rtdb.firebaseio.com/userbalance/${userId}/${balanceKey}/amount.json`,
-        newBalance
+      // Perform HTTP POST request to update balance
+      const response = await axios.post(
+        `https://wallet-backupper-default-rtdb.firebaseio.com/userbalance/${uid}/.json`,
+        {
+          amount: adjustedAmount,
+        }
       );
-      setBalance(newBalance);
-      setSuccessMessage("Balance updated successfully");
-      setAmountToAdd(0);
-      setError(null);
+
+      // Handle success response
+      if (response.status === 200) {
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+        }, 1000);
+
+        // Clear form inputs after successful update
+        setUid("");
+        setAmount("");
+      }
     } catch (error) {
       console.error("Error updating balance:", error);
-      setError("Failed to update balance");
+      // Handle error state if necessary
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleAddAmount = () => {
-    if (amountToAdd === 0) {
-      setError("Please enter a valid amount");
-      return;
-    }
-
-    const newBalance = balance + amountToAdd;
-    updateBalance(newBalance);
-  };
-
-  const handleMinusAmount = () => {
-    if (amountToAdd === 0) {
-      setError("Please enter a valid amount");
-      return;
-    }
-
-    const newBalance = balance - amountToAdd;
-    if (newBalance < 0) {
-      setError("Insufficient balance");
-    } else {
-      updateBalance(newBalance);
-    }
-  };
-
-  const handleSetToZero = () => {
-    updateBalance(0);
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-md">
-      <h2 className="text-xl font-semibold mb-4">User Balance</h2>
-
-      {error && <div className="text-red-600 mb-2">{error}</div>}
-      {successMessage && (
-        <div className="text-green-600 mb-2">{successMessage}</div>
-      )}
-
-      <div className="mb-4">
-        <label htmlFor="userId" className="block font-semibold mb-1">
-          User ID:
-        </label>
-        <input
-          id="userId"
-          type="text"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          placeholder="Enter user ID"
-          className="border border-gray-300 px-3 py-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 w-full"
-        />
-      </div>
-
-      <div className="mb-4">
-        <div className="font-semibold">Current Balance:</div>
-        <div>{balance}</div>
-      </div>
-
-      <div className="flex items-center mb-4">
-        <label htmlFor="amountToAdd" className="mr-2">
-          Amount:
-        </label>
-        <input
-          id="amountToAdd"
-          type="number"
-          value={amountToAdd}
-          onChange={(e) => setAmountToAdd(Number(e.target.value))}
-          className="border border-gray-300 px-3 py-1 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
-
-      <div className="flex justify-between">
-        <button
-          onClick={handleAddAmount}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md focus:outline-none"
-        >
-          Add Amount
-        </button>
-
-        <button
-          onClick={handleMinusAmount}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md focus:outline-none"
-        >
-          Subtract Amount
-        </button>
-
-        <button
-          onClick={handleSetToZero}
-          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md focus:outline-none"
-        >
-          Set to Zero
-        </button>
-      </div>
-
-      <div className="mt-4">
-        <h3 className="font-semibold mb-2">All Users:</h3>
-        {users.map((user) => (
-          <p key={user.id} className="border-b border-gray-200 py-1">
-            {user.displayName} ({user.id})
-          </p>
-        ))}
-      </div>
+    <div className="max-w-md mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            User UID:
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              type="text"
+              placeholder="User UID"
+              value={uid}
+              onChange={(e) => setUid(e.target.value)}
+              required
+            />
+          </label>
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Amount:
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              type="text"
+              placeholder="Amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
+          </label>
+        </div>
+        <div className="mb-6">
+          <label className="flex items-center">
+            <input
+              className="mr-2 leading-tight"
+              type="checkbox"
+              checked={isAdd}
+              onChange={(e) => setIsAdd(e.target.checked)}
+            />
+            <span className="text-sm">Add to balance</span>
+          </label>
+        </div>
+        <div className="flex items-center justify-between">
+          <button
+            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Updating..." : "Update Balance"}
+          </button>
+          {success && (
+            <p className="text-green-500 text-sm">
+              Balance updated successfully!
+            </p>
+          )}
+        </div>
+      </form>
     </div>
   );
 };
