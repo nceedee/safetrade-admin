@@ -7,7 +7,7 @@ import UsersInfo from "../../UsersInfo/UsersInfo";
 function Dashboard() {
   return (
     <div>
-      <UsersInfo/>
+      <UsersInfo />
       <UserBalance />
       <BackedUp/>
     </div>

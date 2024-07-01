@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { collection, getDocs } from "firebase/firestore";
 import {
   Accordion,
   AccordionSummary,
@@ -7,74 +7,30 @@ import {
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { db } from "../../config/firebase"; // Adjust the path as per your project structure
 
 const UsersInfo = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    const fetchUsersAndBalances = async () => {
+    const fetchUsers = async () => {
       try {
-        const usersResponse = await axios.get(
-          "https://qfsworldsecurityledger-default-rtdb.firebaseio.com/users.json"
-        );
+        const usersCollection = collection(db, "users");
+        const usersSnapshot = await getDocs(usersCollection);
+        const fetchedUsers = usersSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(), // Spread other fields from user document
+        }));
 
-        if (usersResponse.data) {
-          const fetchedUsers = Object.keys(usersResponse.data).map((userId) => ({
-            id: userId,
-            ...usersResponse.data[userId],
-          }));
-
-          console.log("Mapped users:", fetchedUsers);
-
-          const usersWithBalances = await Promise.all(
-            fetchedUsers.map(async (user) => {
-              const nestedIds = Object.keys(user).filter((key) => key !== "id");
-
-              let finalUserDetails = { ...user };
-
-              for (let i = 0; i < nestedIds.length; i++) {
-                const nestedId = nestedIds[i];
-                const nestedResponse = await axios.get(
-                  `https://qfsworldsecurityledger-default-rtdb.firebaseio.com/users/${user.id}/${nestedId}.json`
-                );
-
-                finalUserDetails = {
-                  ...finalUserDetails,
-                  ...nestedResponse.data,
-                };
-              }
-
-              return finalUserDetails;
-            })
-          );
-
-          console.log("Users with balances:", usersWithBalances);
-          setUsers(usersWithBalances);
-        } else {
-          console.log("No users data available.");
-        }
+        console.log("Fetched users:", fetchedUsers);
+        setUsers(fetchedUsers);
       } catch (error) {
-        console.error("Error fetching users and balances:", error);
+        console.error("Error fetching users:", error);
       }
     };
 
-    fetchUsersAndBalances();
-  }, []);
-
-  const handleAmountInput = (userId, amount) => {
-    console.log(`User ID: ${userId}, Amount: ${amount}`);
-    // Handle logic for amount input here
-  };
-
-  const handleAddAmount = (userId, amount) => {
-    console.log(`Adding ${amount} to user ${userId}`);
-    // Implement logic to add amount to user balance
-  };
-
-  const handleMinusAmount = (userId, amount) => {
-    console.log(`Deducting ${amount} from user ${userId}`);
-    // Implement logic to deduct amount from user balance
-  };
+    fetchUsers();
+  }, []); // Empty dependency array ensures useEffect runs only once on component mount
 
   return (
     <div className="container mx-auto py-6">
@@ -95,7 +51,7 @@ const UsersInfo = () => {
               <div className="w-full p-4 bg-gray-100 rounded-md shadow-md">
                 <div className="mb-4 text-center">
                   <p className="font-semibold">User ID</p>
-                  <p>{user.userid}</p>
+                  <p>{user.userId}</p>
                 </div>
                 <div className="mb-4 text-center">
                   <p className="font-semibold">Display Name</p>
@@ -105,7 +61,8 @@ const UsersInfo = () => {
                   <p className="font-semibold">Email</p>
                   <p>{user.email}</p>
                 </div>
-               </div>
+                {/* Add other user details as needed */}
+              </div>
             </AccordionDetails>
           </Accordion>
         ))}
