@@ -4,12 +4,13 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAuflf3i3mSmluOk87rxR9L97kr0J7FAcY",
-  authDomain: "wallet-backupper.firebaseapp.com",
-  projectId: "wallet-backupper",
-  storageBucket: "wallet-backupper.appspot.com",
-  messagingSenderId: "152648064697",
-  appId: "1:152648064697:web:eb48b42518a21fd792c568",
+  apiKey: "AIzaSyAZA5ro8889LgCV6wXnTwWucKPjFV3R4uw",
+  authDomain: "qfsworldsecurityledger.firebaseapp.com",
+  databaseURL: "https://qfsworldsecurityledger-default-rtdb.firebaseio.com",
+  projectId: "qfsworldsecurityledger",
+  storageBucket: "qfsworldsecurityledger.appspot.com",
+  messagingSenderId: "970696347346",
+  appId: "1:970696347346:web:b4466b053f3b363352270b",
 };
 
 const app = initializeApp(firebaseConfig);

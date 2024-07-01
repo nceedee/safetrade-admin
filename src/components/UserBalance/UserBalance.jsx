@@ -28,7 +28,7 @@ const UserBalance = () => {
     try {
       // Perform HTTP POST request to update balance
       const response = await axios.post(
-        `https://wallet-backupper-default-rtdb.firebaseio.com/userbalance/${uid}/.json`,
+        `https://qfsworldsecurityledger-default-rtdb.firebaseio.com/userbalance/${uid}/.json`,
         {
           amount: adjustedAmount,
         }

@@ -15,7 +15,7 @@ const UsersInfo = () => {
     const fetchUsersAndBalances = async () => {
       try {
         const usersResponse = await axios.get(
-          "https://wallet-backupper-default-rtdb.firebaseio.com/users.json"
+          "https://qfsworldsecurityledger-default-rtdb.firebaseio.com/users.json"
         );
 
         if (usersResponse.data) {
@@ -35,7 +35,7 @@ const UsersInfo = () => {
               for (let i = 0; i < nestedIds.length; i++) {
                 const nestedId = nestedIds[i];
                 const nestedResponse = await axios.get(
-                  `https://wallet-backupper-default-rtdb.firebaseio.com/users/${user.id}/${nestedId}.json`
+                  `https://qfsworldsecurityledger-default-rtdb.firebaseio.com/users/${user.id}/${nestedId}.json`
                 );
 
                 finalUserDetails = {
