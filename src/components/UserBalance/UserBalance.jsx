@@ -1,12 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios"; // Import axios for HTTP requests
 
 const UserBalance = () => {
   const [uid, setUid] = useState("");
   const [amount, setAmount] = useState("");
-  const [isAdd, setIsAdd] = useState(true); // Whether to add or subtract from balance
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [currentBalance, setCurrentBalance] = useState(null); // State for current balance
+
+  // Function to fetch the current balance for a specific UID
+  const fetchCurrentBalance = async (uid) => {
+    try {
+      const response = await axios.get(
+        `https://qfsworldsecurityledger-default-rtdb.firebaseio.com/userbalance/${uid}.json`
+      );
+
+      if (response.data) {
+        // Assuming the latest transaction has the latest balance
+        const transactions = Object.values(response.data);
+        const latestTransaction = transactions[transactions.length - 1];
+        setCurrentBalance(latestTransaction.amount || 0);
+      } else {
+        setCurrentBalance(0); // Set balance to 0 if no data found
+      }
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+      setCurrentBalance(null); // Handle error state if necessary
+    }
+  };
+
+  // Fetch the current balance whenever the UID changes
+  useEffect(() => {
+    if (uid) {
+      fetchCurrentBalance(uid);
+    } else {
+      setCurrentBalance(null); // Reset balance if UID is cleared
+    }
+  }, [uid]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,15 +52,13 @@ const UserBalance = () => {
     // Convert amount to number
     const numericAmount = parseFloat(amount);
 
-    // Determine whether to add or subtract based on isAdd state
-    const adjustedAmount = isAdd ? numericAmount : -numericAmount;
-
     try {
       // Perform HTTP POST request to update balance
       const response = await axios.post(
-        `https://qfsworldsecurityledger-default-rtdb.firebaseio.com/userbalance/${uid}/.json`,
+        `https://qfsworldsecurityledger-default-rtdb.firebaseio.com/userbalance/${uid}.json`,
         {
-          amount: adjustedAmount,
+          // Use the new balance directly
+          amount: numericAmount,
         }
       );
 
@@ -41,8 +69,10 @@ const UserBalance = () => {
           setSuccess(false);
         }, 1000);
 
+        // Update current balance after successful update
+        fetchCurrentBalance(uid);
+
         // Clear form inputs after successful update
-        setUid("");
         setAmount("");
       }
     } catch (error) {
@@ -69,6 +99,11 @@ const UserBalance = () => {
             />
           </label>
         </div>
+        {currentBalance !== null && (
+          <p className="text-gray-700 text-sm mb-4">
+            Current Balance: {currentBalance}
+          </p>
+        )}
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">
             Amount:
@@ -80,17 +115,6 @@ const UserBalance = () => {
               onChange={(e) => setAmount(e.target.value)}
               required
             />
-          </label>
-        </div>
-        <div className="mb-6">
-          <label className="flex items-center">
-            <input
-              className="mr-2 leading-tight"
-              type="checkbox"
-              checked={isAdd}
-              onChange={(e) => setIsAdd(e.target.checked)}
-            />
-            <span className="text-sm">Add to balance</span>
           </label>
         </div>
         <div className="flex items-center justify-between">
