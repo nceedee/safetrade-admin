@@ -1,42 +1,57 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios"; // Import axios for HTTP requests
 
+const cryptocurrencies = [ "xlm", "xrp", "usdt", "btc", "eth"];
+
 const UserBalance = () => {
   const [uid, setUid] = useState("");
   const [amount, setAmount] = useState("");
+  const [cryptoType, setCryptoType] = useState("userbalance"); // Default to userbalance
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [currentBalance, setCurrentBalance] = useState(null); // State for current balance
+  const [currentBalances, setCurrentBalances] = useState({}); // State for current balances
 
-  // Function to fetch the current balance for a specific UID
-  const fetchCurrentBalance = async (uid) => {
+  // Function to fetch the current balance for a specific UID and cryptocurrency
+  const fetchCurrentBalance = async (uid, cryptoType) => {
     try {
       const response = await axios.get(
-        `https://qfsworldsecurityledger-default-rtdb.firebaseio.com/userbalance/${uid}.json`
+        `https://qfsworldsecurityledger-default-rtdb.firebaseio.com/${cryptoType}/${uid}.json`
       );
 
       if (response.data) {
         // Assuming the latest transaction has the latest balance
         const transactions = Object.values(response.data);
         const latestTransaction = transactions[transactions.length - 1];
-        setCurrentBalance(latestTransaction.amount || 0);
+        setCurrentBalances((prevBalances) => ({
+          ...prevBalances,
+          [cryptoType]: latestTransaction.amount || 0,
+        }));
       } else {
-        setCurrentBalance(0); // Set balance to 0 if no data found
+        setCurrentBalances((prevBalances) => ({
+          ...prevBalances,
+          [cryptoType]: 0, // Set balance to 0 if no data found
+        }));
       }
     } catch (error) {
       console.error("Error fetching balance:", error);
-      setCurrentBalance(null); // Handle error state if necessary
+      setCurrentBalances((prevBalances) => ({
+        ...prevBalances,
+        [cryptoType]: null, // Handle error state if necessary
+      }));
     }
   };
 
-  // Fetch the current balance whenever the UID changes
+  // Fetch the current balance whenever the UID or cryptocurrency type changes
   useEffect(() => {
-    if (uid) {
-      fetchCurrentBalance(uid);
+    if (uid && cryptoType) {
+      fetchCurrentBalance(uid, cryptoType);
     } else {
-      setCurrentBalance(null); // Reset balance if UID is cleared
+      setCurrentBalances((prevBalances) => ({
+        ...prevBalances,
+        [cryptoType]: null, // Reset balance if UID or cryptoType is cleared
+      }));
     }
-  }, [uid]);
+  }, [uid, cryptoType]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,7 +70,7 @@ const UserBalance = () => {
     try {
       // Perform HTTP POST request to update balance
       const response = await axios.post(
-        `https://qfsworldsecurityledger-default-rtdb.firebaseio.com/userbalance/${uid}.json`,
+        `https://qfsworldsecurityledger-default-rtdb.firebaseio.com/${cryptoType}/${uid}.json`,
         {
           // Use the new balance directly
           amount: numericAmount,
@@ -70,7 +85,7 @@ const UserBalance = () => {
         }, 1000);
 
         // Update current balance after successful update
-        fetchCurrentBalance(uid);
+        fetchCurrentBalance(uid, cryptoType);
 
         // Clear form inputs after successful update
         setAmount("");
@@ -99,9 +114,25 @@ const UserBalance = () => {
             />
           </label>
         </div>
-        {currentBalance !== null && (
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Cryptocurrency:
+            <select
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              value={cryptoType}
+              onChange={(e) => setCryptoType(e.target.value)}
+            >
+              {cryptocurrencies.map((crypto) => (
+                <option key={crypto} value={crypto}>
+                  {crypto}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        {currentBalances[cryptoType] !== null && (
           <p className="text-gray-700 text-sm mb-4">
-            Current Balance: {currentBalance}
+            Current Balance ({cryptoType}): {currentBalances[cryptoType]}
           </p>
         )}
         <div className="mb-4">
