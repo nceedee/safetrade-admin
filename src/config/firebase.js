@@ -4,13 +4,13 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAZA5ro8889LgCV6wXnTwWucKPjFV3R4uw",
-  authDomain: "qfsworldsecurityledger.firebaseapp.com",
-  databaseURL: "https://qfsworldsecurityledger-default-rtdb.firebaseio.com",
-  projectId: "qfsworldsecurityledger",
-  storageBucket: "qfsworldsecurityledger.appspot.com",
-  messagingSenderId: "970696347346",
-  appId: "1:970696347346:web:b4466b053f3b363352270b",
+  apiKey: "AIzaSyBdRlH1jlcvvl3Uju2trFPOlyxuo4JmU6A",
+  authDomain: "tanstack-fetch.firebaseapp.com",
+  databaseURL: "https://tanstack-fetch-default-rtdb.firebaseio.com",
+  projectId: "tanstack-fetch",
+  storageBucket: "tanstack-fetch.appspot.com",
+  messagingSenderId: "52254064703",
+  appId: "1:52254064703:web:3634c16fdd8fcdd8fbb88a",
 };
 
 const app = initializeApp(firebaseConfig);

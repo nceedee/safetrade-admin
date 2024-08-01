@@ -1,1 +1,1 @@
-export const API = "https://wallet-backupper-default-rtdb.firebaseio.com"
+export const API = "https://tanstack-fetch-default-rtdb.firebaseio.com";
