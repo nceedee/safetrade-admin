@@ -8,8 +8,6 @@ const balanceTypes = [
   "totalEarn",
   "totalInvest",
   "totalPayout",
-  "totalReferralBonus",
-  "totalTicket",
 ];
 
 const UserBalance = () => {
